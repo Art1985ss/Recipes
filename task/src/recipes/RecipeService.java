@@ -1,6 +1,7 @@
 package recipes;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import javax.validation.*;
@@ -21,11 +22,12 @@ public class RecipeService {
         validator = factory.getValidator();
     }
 
-    public Recipe.ID save(Recipe recipe) throws ValidationException {
+    public Recipe.ID save(Recipe recipe, User user) throws ValidationException {
         Set<ConstraintViolation<Recipe>> violations = validator.validate(recipe);
         if (!violations.isEmpty()) {
             throw new ValidationException("Non valid recipe to save");
         }
+        recipe.setAuthor(user);
         repository.save(recipe);
         return new Recipe.ID(recipe.getId());
     }
@@ -35,15 +37,21 @@ public class RecipeService {
                 .orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " exists!"));
     }
 
-    public void deleteById(long id) throws NoSuchElementException {
+    public void deleteById(long id, User user) throws NoSuchElementException, AccessDeniedException {
         Recipe recipe = findById(id);
+        if (!recipe.getAuthor().equals(user)) {
+            throw new AccessDeniedException("User not authorized to delete this recipe");
+        }
         repository.delete(recipe);
     }
 
-    public void update(long id, Recipe recipe) throws NoSuchElementException {
+    public void update(long id, Recipe recipe, User user) throws NoSuchElementException, ValidationException, AccessDeniedException {
         Recipe oldRecipe = findById(id);
+        if (!oldRecipe.getAuthor().equals(user)) {
+            throw new AccessDeniedException("User not authorized to modify this recipe");
+        }
         recipe.setId(oldRecipe.getId());
-        save(recipe);
+        save(recipe, user);
     }
 
     public List<Recipe> search(Optional<String> category, Optional<String> name) throws ValidationException {

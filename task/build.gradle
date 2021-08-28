@@ -21,6 +21,10 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.18'
 
     // https://mvnrepository.com/artifact/com.h2database/h2
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+
+
+    // https://mvnrepository.com/artifact/com.h2database/h2
     testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
 
 

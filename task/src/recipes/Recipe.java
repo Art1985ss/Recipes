@@ -36,6 +36,10 @@ public class Recipe {
     private String category;
     @UpdateTimestamp
     private LocalDateTime date;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User author;
 
     @Data
     @AllArgsConstructor
